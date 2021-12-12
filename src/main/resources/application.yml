@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: local
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  main:
+    allow-bean-definition-overriding: true
+  session:
+    store-type: none  
+  servlet:
+    multipart:
+      max-file-size: 1073741824
+      max-request-size: 1073741824
+
+weather-stack:
+  api: http://api.weatherstack.com/current?access_key=${weather-stack-access-key}
+  
+open-weather-map:
+  api: http://api.openweathermap.org/data/2.5/weather?appid=${open-weather-map-access-key}&units=metric

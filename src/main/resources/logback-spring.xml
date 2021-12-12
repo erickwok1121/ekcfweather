@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>	
+<configuration debug="false">
+	<include resource="org/springframework/boot/logging/logback/base.xml" />
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+	<property name="logPath" value="/logs" />
+	<property name="maxRollingFiles" value="30" />
+	
+	<!-- https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-logging.html#_profile_specific_configuration -->
+	<springProfile name="uat,uat">
+		<springProperty scope="context" name="profile" defaultValue="e01" source="SPRING_PROFILES_ACTIVE" />
+	</springProfile>
+	<springProfile name="local">
+		<springProperty scope="context" name="profile" defaultValue="local" source="SPRING_PROFILES_ACTIVE" />
+	</springProfile>
+	<springProfile name="!local,!uat">
+		<springProperty scope="context" name="profile" defaultValue="" source="SPRING_PROFILES_ACTIVE" />
+	</springProfile>
+
+	<springProperty scope="context" name="app_name" source="APPLICATION_NAME" />
+	<springProperty scope="context" name="app_version" source="APPLICATION_VERSION" />
+	<springProperty scope="context" name="host_name" source="HOSTNAME" />
+	<springProperty scope="context" name="app_node_name" source="APPLICATION_NODE_NAME" />
+
+	<appender name="RollingFile-Appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/logs/${app_node_name}.log</file>
+			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- <fileNamePattern>C:/Temp/logback/archive/email.log.%d{yyyy-MM-dd}.log</fileNamePattern> -->
+			<fileNamePattern>/logs/archive/${app_name}/${app_node_name}.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+				<maxHistory>90</maxHistory>
+			</rollingPolicy>
+			<encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder" >
+				<includeCallerData>true</includeCallerData>
+					<providers>
+						<mdc/> 
+						<context/>
+						<logLevel/>
+						<loggerName/>
+						<threadName/>
+						<message/>
+						<logstashMarkers/> 
+						<arguments/>
+						<stackTrace/>
+						<callerData/>
+					</providers>
+			</encoder>
+	</appender>
+	
+	<appender name="Async-Appender" class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>0</discardingThreshold> <!-- default 20, means drop lower event (TRACE, DEBUG and INFO) when has 20% capacity remaining -->
+		<appender-ref ref="RollingFile-Appender" />
+		<includeCallerData>true</includeCallerData>
+		<neverBlock>false</neverBlock><!-- default false, set to true to cause the Appender not block the application and just drop the messages -->
+	</appender>
+
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{login_user}] %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="app-log" class="ch.qos.logback.classic.AsyncAppender">
+		<appender class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<!-- <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"> -->
+			<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+				<!-- daily rollover -->
+				<fileNamePattern>${logPath}/${app_node_name}.%d{yyyy-MM-dd}-app.%i.log.gz</fileNamePattern>
+				<!-- keep 30 days' worth of history -->
+				<maxHistory>${maxRollingFiles}</maxHistory>
+				<maxFileSize>20MB</maxFileSize>
+			</rollingPolicy>
+			<encoder>
+			 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{login_user}] %logger - %msg%n</pattern>
+			</encoder>
+		</appender>
+	</appender>
+		
+	<appender name="err-log" class="ch.qos.logback.classic.AsyncAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>WARN</level>
+		</filter>
+		<appender class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<!-- daily rollover -->
+				<fileNamePattern>${logPath}/${app_node_name}.%d{yyyy-MM-dd}-err.log.gz</fileNamePattern>
+				<!-- keep 30 days' worth of history -->
+				<maxHistory>${maxRollingFiles}</maxHistory>
+			</rollingPolicy>
+			<encoder>
+			 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{login_user}] %logger{36} - %msg%n</pattern>
+			</encoder>
+		</appender>
+	</appender>
+	
+	<root level="INFO">
+		<appender-ref ref="console" />
+		<appender-ref ref="app-log" />
+		<appender-ref ref="err-log" />
+	</root>
+
+</configuration>

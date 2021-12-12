@@ -1,0 +1,22 @@
+service:
+  server:
+    port: 8080
+
+server:
+  servlet:
+    session:
+      timeout: 3600
+
+logging:
+  level:
+    com.currencyfair.backend: debug
+    
+cache-expiry: 3
+    
+weather-stack-access-key: e24b9deff5aed9e2da7379b4e810b38e
+
+open-weather-map-access-key: 2326504fb9b100bee21400190e4dbe6d
+
+  
+
+

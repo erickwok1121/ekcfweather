@@ -1,9 +1,17 @@
 - Implemented with SpringBoot with the MVC
-- JDK 11, Spring Boot 2.4.5, Gradle
-- Compile the program with "gradlew bootJar"
-- Start the server with "jar -jar currencyfair-weather-backend.jar"
-- Test with PostMan
 
+- JDK 11, Spring Boot 2.4.5, Gradle
+
+- Update application-local.xml before build
+  > weather-stack-access-key, the access key of weather stack
+  > open-weather-map-access-key, the api key of open weather map
+  > cache-expiry, the result would be cached in X seconds and the result would be retrieved from cache
+
+- Compile the program with "gradlew bootJar"
+
+- Start the server with "jar -jar currencyfair-weather-backend.jar"
+
+- Test with PostMan
   Sample
   
   By default, "Melbourne" from Australia would be retrieved
